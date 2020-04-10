@@ -43,7 +43,19 @@ init([]) ->
     }
   },
 
-  ChildSpecs = [TcpAcceptorSupSpec],
+  TcpProcessorSupSpec = #{
+    id => tcp_processor_sup,
+    start => {
+      tcp_processor_sup,
+      start_link,
+      []
+    }
+  },
+
+  ChildSpecs = [
+    TcpAcceptorSupSpec,
+    TcpProcessorSupSpec
+  ],
   {ok, {SupFlags, ChildSpecs}}.
 
 %% internal functions

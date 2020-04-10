@@ -8,16 +8,35 @@
 
 -behaviour(supervisor).
 
+-include("tcp_processos.hrl").
+
 -export([start_link/0, init/1]).
+-export([start_child/1]).
+
+-define(MAX_NUMBER, 342323).
 
 start_link() ->
   supervisor:start_link({local, ?MODULE}, ?MODULE, []).
 
 init([]) ->
-  SupFlags = #{strategy => one_for_all,
+  SupFlags = #{
+    strategy => simple_one_for_one,
     intensity => 0,
-    period => 1},
-  ChildSpecs = [],
+    period => 1
+  },
+  ChildSpecs = [
+    #{
+      id => tcp_processor_srv,
+      start => {
+        tcp_processor_srv,
+        start_link,
+        []
+      },
+      restart => transient,
+      shutdown => brutal_kill
+    }
+  ],
   {ok, {SupFlags, ChildSpecs}}.
 
-
+start_child(LSocket) ->
+  supervisor:start_child(?MODULE, [LSocket]).

@@ -35,9 +35,10 @@ init(Port) when is_number(Port) ->
 handle_call(_Request, _From, State) when is_record(State, tcp_acceptor_srv_state) ->
   {reply, ok, State}.
 
-handle_cast(_Request, State) when is_record(State, tcp_acceptor_srv_state) ->
+handle_cast(accept, State) when is_record(State, tcp_acceptor_srv_state) ->
   case gen_tcp:accept(State#tcp_acceptor_srv_state.listenSocket) of
-    {ok, _} ->
+    {ok, LSocket} ->
+      tcp_processor_sup:start_child(LSocket),
       gen_server:cast(?MODULE, accept),
       {noreply, State};
 
